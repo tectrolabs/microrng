@@ -47,7 +47,7 @@ sudo apt-get install make
 git clone https://github.com/tectrolabs/microrng.git
 ```
 
-* Build utilities:
+* Building utilities:
 ```
 cd microrng/mcrng
 make 
