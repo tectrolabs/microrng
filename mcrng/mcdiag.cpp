@@ -91,6 +91,8 @@ int main(int argc, char **argv)
     }
     printf("%8ld Hz\n", (long)spi.getMaxClockFrequency());
 
+    printf("New SPI clock frequency ------------------------------- ");
+    printf("%8ld Hz\n", (long)spi.getMaxClockFrequency());
 
     printf("Retrieving %d random bytes ----------------------------- ", BLOCK_SIZE_TEST_BYTES);
     status = spi.retrieveRandomBytes(BLOCK_SIZE_TEST_BYTES, testBuff);
