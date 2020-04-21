@@ -9,14 +9,17 @@ BINDIR = $(PREFIX)/bin
 
 
 MCDIAG = mcdiag
+SAMPLE = sample
 
-all: $(MCDIAG) 
+all: $(MCDIAG) $(SAMPLE)
 
 $(MCDIAG): mcdiag.cpp
 	$(CC) mcdiag.cpp MicroRngSPI.cpp -o $(MCDIAG) $(CFLAGS) -lm $(CPPFLAGS)
 
+$(SAMPLE): sample.cpp
+	$(CC) sample.cpp MicroRngSPI.cpp -o $(SAMPLE) $(CFLAGS) -lm $(CPPFLAGS)
 clean:
-	rm -f *.o ; rm $(MCDIAG)
+	rm -f *.o ; rm $(MCDIAG) $(SAMPLE)
 
 install:
 	install $(MCDIAG) $(BINDIR)/$(MCDIAG)
