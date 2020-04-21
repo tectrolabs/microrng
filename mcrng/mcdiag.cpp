@@ -1,5 +1,5 @@
 /**
- *   Copyright (c) 2018 TectroLabs L.L.C.
+ *   Copyright (C) 2014-2020 TectroLabs LLC, https://tectrolabs.com
  *
  *    Permission is hereby granted, free of charge, to any person obtaining
  *    a copy of this software and associated documentation files (the "Software"),
@@ -29,7 +29,6 @@
  *    @brief MicroRNG diagnostics utility through SPI interface, used on Raspberry PI 3+ or other Linux-based single-board computers.
  *
  */
-
 #include "MicroRngSPI.h"
 #include <math.h>
 

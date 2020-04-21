@@ -29,7 +29,6 @@
  *    @brief communicates with MicroRNG device through SPI interface on Raspberry PI 3+ or other Linux-based single-board computers.
  *
  */
-
 #ifndef MICRORNGSPI_H
 #define MICRORNGSPI_H
 

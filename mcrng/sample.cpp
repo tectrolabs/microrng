@@ -29,7 +29,6 @@
  *    @brief a sample C program that demonstrates how to retrieve random bytes from MicroRNG device through SPI interface on Raspberry PI 3+ or other Linux-based single-board computers.
  *
  */
-
 #include "MicroRngSPI.h"
 
 #define BYTE_BUFF_SIZE (10)

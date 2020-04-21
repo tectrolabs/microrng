@@ -10,19 +10,25 @@ BINDIR = $(PREFIX)/bin
 
 MCDIAG = mcdiag
 SAMPLE = sample
+MCRNG = mcrng
 
-all: $(MCDIAG) $(SAMPLE)
+all: $(MCDIAG) $(SAMPLE) $(MCRNG)
+
+$(MCRNG): mcrng.cpp
+	$(CC) mcrng.cpp MicroRngSPI.cpp -o $(MCRNG) $(CFLAGS) -lm $(CPPFLAGS)
 
 $(MCDIAG): mcdiag.cpp
 	$(CC) mcdiag.cpp MicroRngSPI.cpp -o $(MCDIAG) $(CFLAGS) -lm $(CPPFLAGS)
 
 $(SAMPLE): sample.cpp
 	$(CC) sample.cpp MicroRngSPI.cpp -o $(SAMPLE) $(CFLAGS) -lm $(CPPFLAGS)
+
 clean:
-	rm -f *.o ; rm $(MCDIAG) $(SAMPLE)
+	rm -f *.o ; rm $(MCDIAG) $(SAMPLE) $(MCRNG)
 
 install:
 	install $(MCDIAG) $(BINDIR)/$(MCDIAG)
+	install $(MCRNG) $(BINDIR)/$(MCRNG)
 
 uninstall:
-	rm $(BINDIR)/$(MCDIAG)
+	rm $(BINDIR)/$(MCDIAG) $(BINDIR)/$(MCRNG)
