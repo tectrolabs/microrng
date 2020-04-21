@@ -1,6 +1,6 @@
 CC=gcc
 SWRNG_FLAGS=-D_FILE_OFFSET_BITS=64
-CFLAGS= -lusb-1.0 -O2 -Wall -Wextra
+CFLAGS= -O2 -Wall -Wextra
 CPPFLAGS=-lstdc++
 CFLAGS_THREAD=-lpthread
 
