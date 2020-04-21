@@ -70,7 +70,7 @@ void MicroRngSPI::clearErrMsg()
 }
 
 /**
- * Check if connection to SPI device is established.
+ * Check if connection to SPI device is established
  *
  * @return true if already connected
  */
@@ -160,8 +160,8 @@ bool MicroRngSPI::connect(const char *devicePath)
 }
 
 /**
- * Exchange bytes with connected device by sending a command to MicroRNG
- * device while receiving response for the previous command.
+ * Exchange bytes with connected MicroRNG device by sending a command 
+ * while receiving response for the previous command.
  *
  * @param cmd one byte command that will be sent to connected device through SPI interface
  * @param rx pointer to receiving byte from connected device through SPI interface
@@ -195,7 +195,7 @@ bool MicroRngSPI::exhangeByte(char cmd, uint8_t *rx)
 }
 
 /**
- * Exchange bytes with connected device by sending a command to MicroRNG device while receiving response for the previous command.
+ * Exchange bytes with connected MicroRNG device by sending a command while receiving response for the previous command.
  * It may need an additional transfer to execute the command if the last command was different.
  *
  * @param cmd one byte command that will be sent to connected device through SPI interface
@@ -238,10 +238,10 @@ bool MicroRngSPI::retrieveDeviceStatusByte(uint8_t *rx)
 }
 
 /**
- * Shuts down the random noise sources of the MicroRNG device.
+ * Shuts down both random noise sources of the MicroRNG device.
  * This command is used to enable the sleep mode when the device is not in use to preserve energy.
  *
- * @param rx pointer to RNG status byte. Expected value is 200.
+ * @param rx pointer to RNG status byte. Expected value is decimal 200
  *
  * @return true when command exchanged successfully
  */
@@ -255,10 +255,10 @@ bool MicroRngSPI::shutDownNoiseSources(uint8_t *rx)
 }
 
 /**
- * Starts up the random noise sources of the MicroRNG device. This command is used to leave the sleep mode to
+ * Starts up both random noise sources of the MicroRNG device. This command is used to leave the sleep mode to
  * restore normal functionality of the device.
  *
- * @param rx pointer to receiving status byte of the RNG. A zero value indicates the noise sources turned on.
+ * @param rx pointer to receiving status byte of the RNG. A zero value indicates that noise sources are turned on.
  *
  * @return true when command exchanged successfully
  */
@@ -272,12 +272,12 @@ bool MicroRngSPI::startUpNoiseSources(uint8_t *rx)
 }
 
 /**
- * This call doesn't have to do anything with the SPI communication. It resets the UART configuration baud rate to the factory default
+ * This call doesn't have to do anything with SPI communication. It resets the UART configuration baud rate to the factory default
  * value 19200 — it will take effect after the device is powered off-and-on or after RST signal assertion.
  * This command is used to restore the factory default MicroRNG device UART baud rate when
  * it has been miss-configured through the 2-wire UART API.
  *
- * @param rx pointer to receiving status byte of the RNG.
+ * @param rx pointer to receiving status byte of the RNG
  *
  * @return true when command exchanged successfully
  */
@@ -291,10 +291,10 @@ bool MicroRngSPI::resetUART(uint8_t *rx)
 }
 
 /**
- * Validate the SPI communication with MicroRNG device by sending a series of test commands and inspecting results.
+ * Validate SPI communication with MicroRNG device by sending a series of test commands and inspecting results.
  *
  *
- * @return true when communication to MicroRNG is validated.
+ * @return true when communication to MicroRNG is validated
  */
 bool MicroRngSPI::validateCommunication()
 {
@@ -320,7 +320,7 @@ bool MicroRngSPI::validateCommunication()
         {
             if (++expectedTestByte != testBuffer[i])
             {
-                setErrMsg("Could not validate connection");
+                setErrMsg("Could not validate SPI communication");
                 return false;
             }
         }
@@ -331,7 +331,7 @@ bool MicroRngSPI::validateCommunication()
 /**
  * Identify the maximum SPI master clock frequency while still maintaining a valid communication with MicroRNG device.
  *
- * @return true when maximum clock frequency is successfully determined.
+ * @return true when maximum clock frequency is successfully determined
  */
 bool MicroRngSPI::autodetectMaxFrequency()
 {
@@ -361,7 +361,7 @@ bool MicroRngSPI::autodetectMaxFrequency()
 /**
  * Retrieves a random byte value processed internally with an embedded Linear Corrector (P. Lacharme)
  *
- * @param rx pointer to receiving random byte.
+ * @param rx pointer to receiving random byte
  *
  * @return true when random data successfully retrieved
  */
@@ -378,7 +378,7 @@ bool MicroRngSPI::retrieveRandomByte(uint8_t *rx)
  * Retrieves random bytes processed internally with an embedded Linear Corrector (P. Lacharme)
  *
  * @param len how many random bytes to retrieve
- * @param rx pointer to receiving random bytes.
+ * @param rx pointer to receiving random bytes
  *
  * @return true when random data successfully retrieved
  */
@@ -412,7 +412,7 @@ bool MicroRngSPI::retrieveRandomBytes(int len, uint8_t *rx)
  * Used for validation of the SPI communication between the master device and the MicroRNG device.
  * Primarily used in the development phase to detect SPI miss-configurations of the master device.
  *
- * @param rx response byte represents the latest SPI transfer ID.
+ * @param rx response byte represents the latest SPI transfer ID
  *
  * @return true when transfer ID successfully retrieved
  */
@@ -465,7 +465,7 @@ bool MicroRngSPI::retrieveTestBytes(int len, uint8_t *rx)
  * Retrieves a raw (unprocessed) random byte value.
  * It should only be used for verification or when used with external post-processing implementations.
  *
- * @param rx pointer to receiving random byte.
+ * @param rx pointer to receiving random byte
  *
  * @return true when random data successfully retrieved
  */
@@ -479,11 +479,11 @@ bool MicroRngSPI::retrieveRawRandomByte(uint8_t *rx)
 }
 
 /**
- * Retrieves a raw (unprocessed) random byte value.
+ * Retrieves a raw (unprocessed) random bytes.
  * It should only be used for verification or when used with external post-processing implementations.
  *
  * @param len how many random bytes to retrieve
- * @param rx pointer to receiving random byte
+ * @param rx pointer to receiving random bytes
  *
  * @return true when random data successfully retrieved
  */
@@ -524,7 +524,7 @@ void MicroRngSPI::setMaxClockFrequency(uint32_t clockHz)
 }
 
 /**
- * Get current SPI master clock frequency.
+ * Get current SPI master clock frequency
  *
  * @return current SPI master clock frequency in Hz
  *
@@ -535,7 +535,7 @@ uint32_t MicroRngSPI::getMaxClockFrequency()
 }
 
 /**
- * Set error message.
+ * Set error message
  *
  * @param errMessage new error message
  */
@@ -545,7 +545,7 @@ void MicroRngSPI::setErrMsg(const char *errMessage)
 }
 
 /**
- * Disconnect from SPI interface device.
+ * Disconnect from SPI interface device
  *
  * @return true when executed successfully
  *
@@ -562,7 +562,7 @@ bool MicroRngSPI::disconnect()
 }
 
 /**
- * Retrieves a pinter to an internally saved error message
+ * Retrieves a pointer to the internally saved error message
  */
 const char* MicroRngSPI::getLastErrMsg()
 {
@@ -570,7 +570,7 @@ const char* MicroRngSPI::getLastErrMsg()
 }
 
 /**
- * De-allocate resources.
+ * De-allocate resources
  */
 MicroRngSPI::~MicroRngSPI()
 {
