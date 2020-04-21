@@ -153,7 +153,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    printf("Computing transfer speed speed --------------------------");
+    printf("Computing SPI transfer speed ----------------------------");
     t = clock();
     for (int i = 0; i < TEST_RETRIEVE_BLOCKS; i++)
     {
