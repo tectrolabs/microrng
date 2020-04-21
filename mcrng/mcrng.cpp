@@ -170,7 +170,7 @@ int processArguments(int argc, char **argv)
             {
                 return -1;
             }
-            maxSpiMasterClock = atoll(argv[idx++]) * 1000;
+            maxSpiMasterClock = (uint32_t)atoi(argv[idx++]) * 1000;
         }
         else if (parseDevicePath(idx, argc, argv) == -1)
         {
@@ -227,12 +227,7 @@ int handleDownloadRequest()
         return -1;
     }
 
-    status = spi.setMaxClockFrequency(maxSpiMasterClock);
-    if (!status)
-    {
-    	fprintf(stderr, " Could not set clock speed for SPI device %s, error: %s ... \n", devicePath, spi.getLastErrMsg());
-        return -1;
-    }
+    spi.setMaxClockFrequency(maxSpiMasterClock);
 
     if (filePathName == NULL)
     {
