@@ -62,6 +62,12 @@ void displayUsage()
     printf("\n");
     printf("     -dp PATH, --device-path PATH\n");
     printf("           SPI device path, default value: /dev/spidev0.0\n");
+    printf("\n");
+    printf("     -cf NUMBER, --clock-frequency NUMBER\n");
+    printf("           SPI master clock frequency in KHz, max value 60000,\n");
+    printf("           skip this option for default 250 KHz frequency.\n");
+    printf("           Setting this value too high may result in miscommunication.\n");
+    printf("           Use 'mcdiag' utility to determine the max frequency.\n");
     printf("EXAMPLES:\n");
     printf("     It may require 'sudo' permissions to run this utility.\n");
     printf("     To download 12 MB of true random bytes to 'rnd.bin' file\n");
@@ -157,6 +163,15 @@ int processArguments(int argc, char **argv)
             }
             filePathName = argv[idx++];
         }
+        else if (strcmp("-cf", argv[idx]) == 0 || strcmp("--clock-frequency",
+                 argv[idx]) == 0)
+        {
+            if (validateArgumentCount(++idx, argc) == false)
+            {
+                return -1;
+            }
+            maxSpiMasterClock = atoll(argv[idx++]) * 1000;
+        }
         else if (parseDevicePath(idx, argc, argv) == -1)
         {
             return -1;
@@ -208,7 +223,14 @@ int handleDownloadRequest()
     bool status = spi.connect(devicePath);
     if (!status)
     {
-        fprintf(stderr, " Cannot open spi device %s, error: %s ... \n", devicePath, spi.getLastErrMsg());
+        fprintf(stderr, " Cannot open SPI device %s, error: %s ... \n", devicePath, spi.getLastErrMsg());
+        return -1;
+    }
+
+    status = spi.setMaxClockFrequency(maxSpiMasterClock);
+    if (!status)
+    {
+    	fprintf(stderr, " Could not set clock speed for SPI device %s, error: %s ... \n", devicePath, spi.getLastErrMsg());
         return -1;
     }
 

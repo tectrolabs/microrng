@@ -56,6 +56,11 @@ char *filePathName = NULL;
  */
 char devicePath[256];
 
+/**
+ * Max SPI master clock frequency in Hz
+ */
+uint32_t maxSpiMasterClock = 250000;
+
 FILE *pOutputFile = NULL;
 bool isOutputToStandardOutput = false;
 MicroRngSPI spi;
