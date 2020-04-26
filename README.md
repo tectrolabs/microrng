@@ -56,7 +56,7 @@ make
 ```
 sudo make install
 ```
-### Verify the MicroRNG is working
+### Verify communication with the MicroRNG
 
 * Connect MicroRNG device to the target board through the provided SPI interface.
 * Verify device connectivity with the following command (you may need to use a target board sepecific device path):
