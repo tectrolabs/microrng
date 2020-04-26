@@ -59,7 +59,7 @@ sudo make install
 ### Verify communication with the MicroRNG
 
 * Connect MicroRNG device to the target board through the provided SPI interface.
-* Verify device connectivity with the following command (you may need to use a target board sepecific device path):
+* Verify device connectivity with the following command (you may need to use a target board specific device path):
 ```
 sudo mcdiag /dev/spidev0.0
 ```
