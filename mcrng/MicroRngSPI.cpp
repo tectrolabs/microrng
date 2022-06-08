@@ -233,7 +233,7 @@ bool MicroRngSPI::validateDevice()
     }
 
     uint8_t beginTransactionID;
-    for (int i = 1; i <= 16; ++i)
+    for (int i = 1; i <= 257; ++i)
     {
     	uint8_t transactionID;
         if (!executeCommand('t', &transactionID))
