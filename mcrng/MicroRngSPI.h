@@ -1,5 +1,5 @@
 /**
- *   Copyright (C) 2014-2020 TectroLabs LLC, https://tectrolabs.com
+ *   Copyright (C) 2014-2022 TectroLabs LLC, https://tectrolabs.com
  *
  *    Permission is hereby granted, free of charge, to any person obtaining
  *    a copy of this software and associated documentation files (the "Software"),
@@ -23,8 +23,8 @@
 /**
  *    @file MicroRngSPI.h
  *    @author Andrian Belinski
- *    @date 04/21/2020
- *    @version 1.0
+ *    @date 06/07/2022
+ *    @version 1.1
  *
  *    @brief communicates with MicroRNG device through SPI interface on Raspberry PI 3+ or other Linux-based single-board computers.
  *
@@ -53,6 +53,7 @@ public:
     virtual ~MicroRngSPI();
     bool isConnected();
     bool connect(const char *devicePath);
+    bool validateDevice();
     bool disconnect();
     bool executeCommand(char cmd, uint8_t *rx);
     const char* getLastErrMsg();

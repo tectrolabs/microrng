@@ -1,5 +1,5 @@
 /**
- *   Copyright (C) 2014-2020 TectroLabs LLC, https://tectrolabs.com
+ *   Copyright (C) 2014-2022 TectroLabs LLC, https://tectrolabs.com
  *
  *    Permission is hereby granted, free of charge, to any person obtaining
  *    a copy of this software and associated documentation files (the "Software"),
@@ -23,8 +23,8 @@
 /**
  *    @file MicroRngSPI.cpp
  *    @author Andrian Belinski
- *    @date 04/21/2020
- *    @version 1.0
+ *    @date 06/07/2022
+ *    @version 1.1
  *
  *    @brief communicates with MicroRNG device through SPI interface on Raspberry PI 3+ or other Linux-based single-board computers.
  *
@@ -218,6 +218,41 @@ bool MicroRngSPI::executeCommand(char cmd, uint8_t *rx)
         }
     }
     return exhangeByte(cmd, rx);
+}
+
+/**
+ * Check to see if the MicroRNG device is actually responding to requests.
+ *
+ * @return true when validated successfully
+ */
+bool MicroRngSPI::validateDevice()
+{
+    if (!isConnected())
+    {
+        return false;
+    }
+
+    uint8_t beginTransactionID;
+    for (int i = 1; i <= 257; ++i)
+    {
+    	uint8_t transactionID;
+        if (!executeCommand('t', &transactionID))
+        {
+        	return false;
+        }
+
+    	if (i == 1)
+    	{
+    		beginTransactionID = transactionID;
+    	}
+
+        if ( i != 1 && transactionID != ++beginTransactionID)
+        {
+        	sprintf(lastError, "MicroRNG device not found");
+        	return false;
+        }
+    }
+    return true;
 }
 
 /**

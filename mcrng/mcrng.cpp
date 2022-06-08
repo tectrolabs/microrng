@@ -1,5 +1,5 @@
 /**
- *   Copyright (C) 2014-2020 TectroLabs LLC, https://tectrolabs.com
+ *   Copyright (C) 2014-2022 TectroLabs LLC, https://tectrolabs.com
  *
  *    Permission is hereby granted, free of charge, to any person obtaining
  *    a copy of this software and associated documentation files (the "Software"),
@@ -23,8 +23,8 @@
 /**
  *    @file mcrng.cpp
  *    @author Andrian Belinski
- *    @date 04/21/2020
- *    @version 1.0
+ *    @date 06/-7/2022
+ *    @version 1.1
  *
  *    @brief downloads random bytes from MicroRNG device through SPI interface on Raspberry PI 3+ or other Linux-based single-board computers.
  *
@@ -220,14 +220,19 @@ int handleDownloadRequest()
 
     uint8_t receiveByteBuffer[MCR_BUFF_FILE_SIZE_BYTES];
 
-    bool status = spi.connect(devicePath);
-    if (!status)
+    if (!spi.connect(devicePath))
     {
         fprintf(stderr, " Cannot open SPI device %s, error: %s ... \n", devicePath, spi.getLastErrMsg());
         return -1;
     }
 
     spi.setMaxClockFrequency(maxSpiMasterClock);
+
+    if (!spi.validateDevice())
+    {
+        fprintf(stderr, " Cannot access device, error: %s ... \n", spi.getLastErrMsg());
+        return -1;
+    }
 
     if (filePathName == NULL)
     {
@@ -253,8 +258,7 @@ int handleDownloadRequest()
     while (numGenBytes == -1)
     {
         // Infinite loop for downloading unlimited random bytes
-        status = spi.retrieveRandomBytes(MCR_BUFF_FILE_SIZE_BYTES, receiveByteBuffer);
-        if (!status)
+        if (!spi.retrieveRandomBytes(MCR_BUFF_FILE_SIZE_BYTES, receiveByteBuffer))
         {
             fprintf(stderr,
                     "Failed to receive %d bytes for unlimited download, error: %s. \n",
@@ -274,8 +278,7 @@ int handleDownloadRequest()
     int64_t chunkNum;
     for (chunkNum = 0; chunkNum < numCompleteChunks; chunkNum++)
     {
-        status = spi.retrieveRandomBytes(MCR_BUFF_FILE_SIZE_BYTES, receiveByteBuffer);
-        if (!status)
+        if (!spi.retrieveRandomBytes(MCR_BUFF_FILE_SIZE_BYTES, receiveByteBuffer))
         {
             fprintf(stderr, "Failed to receive %d bytes, error: %s. \n",
                     MCR_BUFF_FILE_SIZE_BYTES, spi.getLastErrMsg());
@@ -287,8 +290,7 @@ int handleDownloadRequest()
     if (chunkRemaindBytes > 0)
     {
         //Process incomplete chunk
-        status = spi.retrieveRandomBytes(chunkRemaindBytes, receiveByteBuffer);
-        if (!status)
+        if (!spi.retrieveRandomBytes(chunkRemaindBytes, receiveByteBuffer))
         {
             fprintf(stderr, "Failed to receive %d bytes for last chunk, error: code %s. ",
                     chunkRemaindBytes,spi.getLastErrMsg());
