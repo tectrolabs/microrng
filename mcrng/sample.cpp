@@ -1,5 +1,5 @@
 /**
- *   Copyright (C) 2014-2020 TectroLabs LLC, https://tectrolabs.com
+ *   Copyright (C) 2014-2022 TectroLabs LLC, https://tectrolabs.com
  *
  *    Permission is hereby granted, free of charge, to any person obtaining
  *    a copy of this software and associated documentation files (the "Software"),
@@ -23,8 +23,8 @@
 /**
  *    @file sample.cpp
  *    @author Andrian Belinski
- *    @date 04/21/2020
- *    @version 1.0
+ *    @date 06/07/2022
+ *    @version 1.1
  *
  *    @brief a sample C program that demonstrates how to retrieve random bytes from MicroRNG device through SPI interface on Raspberry PI 3+ or other Linux-based single-board computers.
  *
@@ -49,16 +49,16 @@ int main(int argc, char **argv) {
 	printf("--------------------------------------------------------------------------\n");
 	printf("--- Sample C program for retrieving random bytes from MicroRNG device ----\n");
 	printf("---    Use with RPI 3+ or other Linux-based single-board computers     ---\n");
-    	printf("--------------------------------------------------------------------------\n");
+	printf("--------------------------------------------------------------------------\n");
 
-    	setbuf(stdout, NULL);
+	setbuf(stdout, NULL);
 
-    	if (argc < 2)
-    	{
-        	printf("Usage: sample <spi device>\n");
-        	printf("Example: sample /dev/spidev0.0\n");
-        	return -1;
-    	}
+	if (argc < 2)
+	{
+		printf("Usage: sample <spi device>\n");
+		printf("Example: sample /dev/spidev0.0\n");
+		return -1;
+	}
 
     	char *devicePath = argv[1];
 
@@ -66,6 +66,12 @@ int main(int argc, char **argv) {
 		printf("%s\n", spi.getLastErrMsg());
 		return -1;
 	}
+
+	if (!spi.validateDevice()) {
+		printf("%s\n", spi.getLastErrMsg());
+		return -1;
+	}
+
 	printf("\nMicroRNG device open successfully, SPI clock frequency: %8ld Hz\n\n", (long)spi.getMaxClockFrequency());
 
 	// Retrieve random bytes from device
