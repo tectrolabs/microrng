@@ -1,5 +1,5 @@
 /**
- *   Copyright (C) 2014-2020 TectroLabs LLC, https://tectrolabs.com
+ *   Copyright (C) 2014-2023 TectroLabs LLC, https://tectrolabs.com
  *
  *    Permission is hereby granted, free of charge, to any person obtaining
  *    a copy of this software and associated documentation files (the "Software"),
@@ -23,8 +23,8 @@
 /**
  *    @file mcrng.h
  *    @author Andrian Belinski
- *    @date 04/21/2020
- *    @version 1.0
+ *    @date 10/28/2023
+ *    @version 1.1
  *
  *    @brief downloads random bytes from MicroRNG device through SPI interface on Raspberry PI 3+ or other Linux-based single-board computers.
  *
@@ -44,36 +44,36 @@
 /**
  * Total number of random bytes needed (a command line argument) max 100000000000 bytes
  */
-int64_t numGenBytes = -1;
+static int64_t numGenBytes = -1;
 
 /**
  * File name for recording the random bytes (a command line argument)
  */
-char *filePathName = NULL;
+static char *filePathName = NULL;
 
 /**
  * SPI device path
  */
-char devicePath[256];
+static char devicePath[256];
 
 /**
  * Max SPI master clock frequency in Hz
  */
-uint32_t maxSpiMasterClock = 250000;
+static uint32_t maxSpiMasterClock = 250000;
 
-FILE *pOutputFile = NULL;
-bool isOutputToStandardOutput = false;
-MicroRngSPI spi;
+static FILE *pOutputFile = NULL;
+static bool isOutputToStandardOutput = false;
+static MicroRngSPI spi;
 
 /**
  * Function Declarations
  */
-void displayUsage();
-int processArguments(int argc, char **argv);
-bool validateArgumentCount(int curIdx, int actualArgumentCount);
-int parseDevicePath(int idx, int argc, char **argv);
-int processDownloadRequest();
-int handleDownloadRequest();
-void writeBytes(uint8_t *bytes, uint32_t numBytes);
+static void displayUsage();
+static int processArguments(int argc, char **argv);
+static bool validateArgumentCount(int curIdx, int actualArgumentCount);
+static int parseDevicePath(int idx, int argc, char **argv);
+static int processDownloadRequest();
+static int handleDownloadRequest();
+static void writeBytes(const uint8_t *bytes, uint32_t numBytes);
 
 #endif /* MCRNG_H_ */

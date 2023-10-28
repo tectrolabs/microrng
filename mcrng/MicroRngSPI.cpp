@@ -1,5 +1,5 @@
 /**
- *   Copyright (C) 2014-2022 TectroLabs LLC, https://tectrolabs.com
+ *   Copyright (C) 2014-2023 TectroLabs LLC, https://tectrolabs.com
  *
  *    Permission is hereby granted, free of charge, to any person obtaining
  *    a copy of this software and associated documentation files (the "Software"),
@@ -23,49 +23,46 @@
 /**
  *    @file MicroRngSPI.cpp
  *    @author Andrian Belinski
- *    @date 06/07/2022
- *    @version 1.1
+ *    @date 10/28/2023
+ *    @version 1.2
  *
  *    @brief communicates with MicroRNG device through SPI interface on Raspberry PI 3+ or other Linux-based single-board computers.
  *
  */
 #include "MicroRngSPI.h"
 
-MicroRngSPI::MicroRngSPI()
-{
-    initialize();
+MicroRngSPI::MicroRngSPI() {
+	initialize();
 }
 
 /**
  * Initialize all variables
  *
  */
-void MicroRngSPI::initialize()
-{
-    deviceConnected = false;
-    fd = -1;
-    setErrMsg("Not Connected");
-    spiMode = SPI_CPHA;
-    spiBits = 8;
-    minClockHz = 250000;
-    clockHz = minClockHz;
-    lastSentCommand = '\0';
-    testCommand = 't';
-    randomByteCommand = 'l';
-    statusByteCommand = 's';
-    rawRandomByteCommand = 'r';
-    shutDownCommand = 'D';
-    startUpCommand = 'U';
-    resetUartSpeedCommand = 'R';
-    maxClockHz = 60000000;
+void MicroRngSPI::initialize() {
+	m_deviceConnected = false;
+	m_fd = -1;
+	setErrMsg("Not Connected");
+	m_spiMode = SPI_CPHA;
+	m_spiBits = 8;
+	m_minClockHz = 250000;
+	m_clockHz = m_minClockHz;
+	m_lastSentCommand = '\0';
+	m_testCommand = 't';
+	m_randomByteCommand = 'l';
+	m_statusByteCommand = 's';
+	m_rawRandomByteCommand = 'r';
+	m_shutDownCommand = 'D';
+	m_startUpCommand = 'U';
+	m_resetUartSpeedCommand = 'R';
+	m_maxClockHz = 60000000;
 }
 
 /**
  * Clear error message
  */
-void MicroRngSPI::clearErrMsg()
-{
-    setErrMsg("");
+void MicroRngSPI::clearErrMsg() {
+	setErrMsg("");
 }
 
 /**
@@ -73,9 +70,8 @@ void MicroRngSPI::clearErrMsg()
  *
  * @return true if already connected
  */
-bool MicroRngSPI::isConnected()
-{
-    return deviceConnected;
+bool MicroRngSPI::isConnected() const {
+	return m_deviceConnected;
 }
 
 /**
@@ -85,77 +81,68 @@ bool MicroRngSPI::isConnected()
  *
  * @return true if connected successfully
  */
-bool MicroRngSPI::connect(const char *devicePath)
-{
-    int retCode;
+bool MicroRngSPI::connect(const char *devicePath) {
+	int retCode;
 
-    if (isConnected())
-    {
-        return false;
-    }
+	if (isConnected()) {
+		return false;
+	}
 
-    clearErrMsg();
+	clearErrMsg();
 
-    fd = open(devicePath, O_RDWR);
-    if (fd < 0)
-    {
-        sprintf(lastError, "Could not open SPI device: %s", devicePath);
-        return false;
-    }
+	m_fd = open(devicePath, O_RDWR);
+	if (m_fd < 0) {
+		sprintf(m_lastError, "Could not open SPI device: %s", devicePath);
+		return false;
+	}
 
-    // Set SPI mode
-    retCode = ioctl(fd, SPI_IOC_WR_MODE, &spiMode);
-    if (retCode == -1)
-    {
-        close(fd);
-        sprintf(lastError, "Could not set SPI write mode");
-        return false;
-    }
+	// Set SPI mode
+	retCode = ioctl(m_fd, SPI_IOC_WR_MODE, &m_spiMode);
+	if (retCode == -1) {
+		close(m_fd);
+		sprintf(m_lastError, "Could not set SPI write mode");
+		return false;
+	}
 
-    retCode = ioctl(fd, SPI_IOC_RD_MODE, &spiMode);
-    if (retCode == -1)
-    {
-        close(fd);
-        sprintf(lastError, "Could not set SPI read mode");
-        return false;
-    }
+	retCode = ioctl(m_fd, SPI_IOC_RD_MODE, &m_spiMode);
+	if (retCode == -1) {
+		close(m_fd);
+		sprintf(m_lastError, "Could not set SPI read mode");
+		return false;
+	}
 
-    // Set 8 bits for data exchange word
-    retCode = ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &spiBits);
-    if (retCode == -1)
-    {
-        close(fd);
-        sprintf(lastError, "Could not set SPI transmission word bits");
-        return false;
-    }
+	// Set 8 bits for data exchange word
+	retCode = ioctl(m_fd, SPI_IOC_WR_BITS_PER_WORD, &m_spiBits);
+	if (retCode == -1) {
+		close(m_fd);
+		sprintf(m_lastError, "Could not set SPI transmission word bits");
+		return false;
+	}
 
-    retCode = ioctl(fd, SPI_IOC_RD_BITS_PER_WORD, &spiBits);
-    if (retCode == -1)
-    {
-        close(fd);
-        sprintf(lastError, "Could not set SPI word bits");
-        return false;
-    }
+	retCode = ioctl(m_fd, SPI_IOC_RD_BITS_PER_WORD, &m_spiBits);
+	if (retCode == -1) {
+		close(m_fd);
+		sprintf(m_lastError, "Could not set SPI word bits");
+		return false;
+	}
 
-    // Set clock frequency
-    retCode = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &clockHz);
-    if (retCode == -1)
-    {
-        close(fd);
-        sprintf(lastError, "Could not set SPI transmission clock frequency");
-        return false;
-    }
+	// Set clock frequency
+	retCode = ioctl(m_fd, SPI_IOC_WR_MAX_SPEED_HZ, &m_clockHz);
+	if (retCode == -1) {
+		close(m_fd);
+		sprintf(m_lastError, "Could not set SPI transmission clock frequency");
+		return false;
+	}
 
-    retCode = ioctl(fd, SPI_IOC_RD_MAX_SPEED_HZ, &clockHz);
-    if (retCode == -1)
-    {
-        close(fd);
-        sprintf(lastError, "Could not set SPI clock frequency");
-        return false;
-    }
+	retCode = ioctl(m_fd, SPI_IOC_RD_MAX_SPEED_HZ, &m_clockHz);
+	if (retCode == -1) {
+		close(m_fd);
+		sprintf(m_lastError, "Could not set SPI clock frequency");
+		return false;
+	}
 
-    deviceConnected = true;
-    return true;
+	m_deviceConnected = true;
+	return true;
 }
 
 /**
@@ -167,30 +154,27 @@ bool MicroRngSPI::connect(const char *devicePath)
  *
  * @return true when data exchanged successfully
  */
-bool MicroRngSPI::exhangeByte(char cmd, uint8_t *rx)
-{
-    int retCode;
-    if (!isConnected())
-    {
-        return false;
-    }
-    *rx = 0;    // Set it initially to zero to avoid 'valgrind' complains
-    lastSentCommand = cmd;
-    struct spi_ioc_transfer tr = {};
-    tr.tx_buf = (unsigned long)&cmd;
-    tr.rx_buf = (unsigned long)rx;
-    tr.len = 1;
-    tr.delay_usecs = 0;
-    tr.speed_hz = clockHz;
-    tr.bits_per_word = spiBits;
+bool MicroRngSPI::exhangeByte(char cmd, uint8_t *rx) {
+	int retCode;
+	if (!isConnected()) {
+		return false;
+	}
+	*rx = 0;    // Set it initially to zero to avoid 'valgrind' complains
+	m_lastSentCommand = cmd;
+	struct spi_ioc_transfer tr = { };
+	tr.tx_buf = (unsigned long) &cmd;
+	tr.rx_buf = (unsigned long) rx;
+	tr.len = 1;
+	tr.delay_usecs = 0;
+	tr.speed_hz = m_clockHz;
+	tr.bits_per_word = m_spiBits;
 
-    retCode = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
-    if (retCode < 1)
-    {
-        sprintf(lastError, "Could not exchange SPI bytes");
-        return false;
-    }
-    return true;
+	retCode = ioctl(m_fd, SPI_IOC_MESSAGE(1), &tr);
+	if (retCode < 1) {
+		sprintf(m_lastError, "Could not exchange SPI bytes");
+		return false;
+	}
+	return true;
 }
 
 /**
@@ -202,22 +186,16 @@ bool MicroRngSPI::exhangeByte(char cmd, uint8_t *rx)
  *
  * @return true when command executed successfully
  */
-bool MicroRngSPI::executeCommand(char cmd, uint8_t *rx)
-{
-    if (!isConnected())
-    {
-        return false;
-    }
+bool MicroRngSPI::executeCommand(char cmd, uint8_t *rx) {
+	if (!isConnected()) {
+		return false;
+	}
 
-    if (cmd != lastSentCommand)
-    {
-        // Will need two data transfers because the current command is different from the one that was sent last time.
-        if (!exhangeByte(cmd, rx))
-        {
-            return false;
-        }
-    }
-    return exhangeByte(cmd, rx);
+	if (cmd != m_lastSentCommand && !exhangeByte(cmd, rx)) {
+		// Will need two data transfers because the current command is different from the one that was sent last time.
+		return false;
+	}
+	return exhangeByte(cmd, rx);
 }
 
 /**
@@ -225,34 +203,28 @@ bool MicroRngSPI::executeCommand(char cmd, uint8_t *rx)
  *
  * @return true when validated successfully
  */
-bool MicroRngSPI::validateDevice()
-{
-    if (!isConnected())
-    {
-        return false;
-    }
+bool MicroRngSPI::validateDevice() {
+	if (!isConnected()) {
+		return false;
+	}
 
-    uint8_t beginTransactionID;
-    for (int i = 1; i <= 257; ++i)
-    {
-    	uint8_t transactionID;
-        if (!executeCommand('t', &transactionID))
-        {
-        	return false;
-        }
+	uint8_t beginTransactionID;
+	for (int i = 1; i <= 257; ++i) {
+		uint8_t transactionID;
+		if (!executeCommand('t', &transactionID)) {
+			return false;
+		}
 
-    	if (i == 1)
-    	{
-    		beginTransactionID = transactionID;
-    	}
+		if (i == 1) {
+			beginTransactionID = transactionID;
+		}
 
-        if ( i != 1 && transactionID != ++beginTransactionID)
-        {
-        	sprintf(lastError, "MicroRNG device not found");
-        	return false;
-        }
-    }
-    return true;
+		if (i != 1 && transactionID != ++beginTransactionID) {
+			sprintf(m_lastError, "MicroRNG device not found");
+			return false;
+		}
+	}
+	return true;
 }
 
 /**
@@ -262,13 +234,11 @@ bool MicroRngSPI::validateDevice()
  *
  * @return true when status retieved successfully
  */
-bool MicroRngSPI::retrieveDeviceStatusByte(uint8_t *rx)
-{
-    if (!isConnected())
-    {
-        return false;
-    }
-    return executeCommand(statusByteCommand, rx);
+bool MicroRngSPI::retrieveDeviceStatusByte(uint8_t *rx) {
+	if (!isConnected()) {
+		return false;
+	}
+	return executeCommand(m_statusByteCommand, rx);
 }
 
 /**
@@ -279,13 +249,11 @@ bool MicroRngSPI::retrieveDeviceStatusByte(uint8_t *rx)
  *
  * @return true when command exchanged successfully
  */
-bool MicroRngSPI::shutDownNoiseSources(uint8_t *rx)
-{
-    if (!isConnected())
-    {
-        return false;
-    }
-    return executeCommand(shutDownCommand, rx);
+bool MicroRngSPI::shutDownNoiseSources(uint8_t *rx) {
+	if (!isConnected()) {
+		return false;
+	}
+	return executeCommand(m_shutDownCommand, rx);
 }
 
 /**
@@ -296,13 +264,11 @@ bool MicroRngSPI::shutDownNoiseSources(uint8_t *rx)
  *
  * @return true when command exchanged successfully
  */
-bool MicroRngSPI::startUpNoiseSources(uint8_t *rx)
-{
-    if (!isConnected())
-    {
-        return false;
-    }
-    return executeCommand(startUpCommand, rx);
+bool MicroRngSPI::startUpNoiseSources(uint8_t *rx) {
+	if (!isConnected()) {
+		return false;
+	}
+	return executeCommand(m_startUpCommand, rx);
 }
 
 /**
@@ -315,13 +281,11 @@ bool MicroRngSPI::startUpNoiseSources(uint8_t *rx)
  *
  * @return true when command exchanged successfully
  */
-bool MicroRngSPI::resetUART(uint8_t *rx)
-{
-    if (!isConnected())
-    {
-        return false;
-    }
-    return executeCommand(resetUartSpeedCommand, rx);
+bool MicroRngSPI::resetUART(uint8_t *rx) {
+	if (!isConnected()) {
+		return false;
+	}
+	return executeCommand(m_resetUartSpeedCommand, rx);
 }
 
 /**
@@ -330,36 +294,28 @@ bool MicroRngSPI::resetUART(uint8_t *rx)
  *
  * @return true when communication to MicroRNG is validated
  */
-bool MicroRngSPI::validateCommunication()
-{
-    if (!isConnected())
-    {
-        return false;
-    }
+bool MicroRngSPI::validateCommunication() {
+	if (!isConnected()) {
+		return false;
+	}
 
-    uint8_t testBuffer[2048];
-    if (!retrieveTestBytes(sizeof(testBuffer), testBuffer))
-    {
-        return false;
-    }
+	uint8_t testBuffer[2048];
+	if (!retrieveTestBytes(sizeof(testBuffer), testBuffer)) {
+		return false;
+	}
 
-    uint8_t expectedTestByte = 0;
-    for (unsigned int i = 0; i < sizeof(testBuffer); i++)
-    {
-        if (i == 0)
-        {
-            expectedTestByte = testBuffer[i];
-        }
-        else
-        {
-            if (++expectedTestByte != testBuffer[i])
-            {
-                setErrMsg("Could not validate SPI communication");
-                return false;
-            }
-        }
-    }
-    return true;
+	uint8_t expectedTestByte = 0;
+	for (unsigned int i = 0; i < sizeof(testBuffer); i++) {
+		if (i == 0) {
+			expectedTestByte = testBuffer[i];
+		} else {
+			if (++expectedTestByte != testBuffer[i]) {
+				setErrMsg("Could not validate SPI communication");
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 /**
@@ -367,29 +323,24 @@ bool MicroRngSPI::validateCommunication()
  *
  * @return true when maximum clock frequency is successfully determined
  */
-bool MicroRngSPI::autodetectMaxFrequency()
-{
-    bool success = false;
-    if (!isConnected())
-    {
-        return false;
-    }
-    for (uint32_t freqHz = minClockHz; freqHz < maxClockHz; freqHz += minClockHz)
-    {
-        uint32_t prevClockHz = getMaxClockFrequency();
-        setMaxClockFrequency(freqHz);
-        bool status = validateCommunication();
-        if (status)
-        {
-            success = true;
-        }
-        else
-        {
-            setMaxClockFrequency(prevClockHz);
-            break;
-        }
-    }
-    return success;
+bool MicroRngSPI::autodetectMaxFrequency() {
+	bool success = false;
+	if (!isConnected()) {
+		return false;
+	}
+	for (uint32_t freqHz = m_minClockHz; freqHz < m_maxClockHz; freqHz +=
+			m_minClockHz) {
+		uint32_t prevClockHz = getMaxClockFrequency();
+		setMaxClockFrequency(freqHz);
+		bool status = validateCommunication();
+		if (status) {
+			success = true;
+		} else {
+			setMaxClockFrequency(prevClockHz);
+			break;
+		}
+	}
+	return success;
 }
 
 /**
@@ -399,13 +350,11 @@ bool MicroRngSPI::autodetectMaxFrequency()
  *
  * @return true when random data successfully retrieved
  */
-bool MicroRngSPI::retrieveRandomByte(uint8_t *rx)
-{
-    if (!isConnected())
-    {
-        return false;
-    }
-    return executeCommand(randomByteCommand, rx);
+bool MicroRngSPI::retrieveRandomByte(uint8_t *rx) {
+	if (!isConnected()) {
+		return false;
+	}
+	return executeCommand(m_randomByteCommand, rx);
 }
 
 /**
@@ -416,29 +365,24 @@ bool MicroRngSPI::retrieveRandomByte(uint8_t *rx)
  *
  * @return true when random data successfully retrieved
  */
-bool MicroRngSPI::retrieveRandomBytes(int len, uint8_t *rx)
-{
-    bool status = true;
-    if (!isConnected())
-    {
-        return false;
-    }
-    if (len <= 0)
-    {
-        setErrMsg("Invalid ammount of random bytes requested");
-        return false;
-    }
+bool MicroRngSPI::retrieveRandomBytes(int len, uint8_t *rx) {
+	bool status = true;
+	if (!isConnected()) {
+		return false;
+	}
+	if (len <= 0) {
+		setErrMsg("Invalid ammount of random bytes requested");
+		return false;
+	}
 
-    for (int i = 0; i < len; i++)
-    {
-        bool status = retrieveRandomByte(rx + i);
-        if (!status)
-        {
-            break;
-        }
-    }
+	for (int i = 0; i < len; i++) {
+		status = retrieveRandomByte(rx + i);
+		if (!status) {
+			break;
+		}
+	}
 
-    return status;
+	return status;
 }
 
 /**
@@ -450,13 +394,11 @@ bool MicroRngSPI::retrieveRandomBytes(int len, uint8_t *rx)
  *
  * @return true when transfer ID successfully retrieved
  */
-bool MicroRngSPI::retrieveTestByte(uint8_t *rx)
-{
-    if (!isConnected())
-    {
-        return false;
-    }
-    return executeCommand(testCommand, rx);
+bool MicroRngSPI::retrieveTestByte(uint8_t *rx) {
+	if (!isConnected()) {
+		return false;
+	}
+	return executeCommand(m_testCommand, rx);
 }
 
 /**
@@ -469,31 +411,25 @@ bool MicroRngSPI::retrieveTestByte(uint8_t *rx)
  *
  * @return true when transfer IDs successfully retrieved
  */
-bool MicroRngSPI::retrieveTestBytes(int len, uint8_t *rx)
-{
-    bool status = true;
-    if (!isConnected())
-    {
-        return false;
-    }
-    if (len <= 0)
-    {
-        setErrMsg("Invalid amount of test bytes requested");
-        return false;
-    }
+bool MicroRngSPI::retrieveTestBytes(int len, uint8_t *rx) {
+	bool status = true;
+	if (!isConnected()) {
+		return false;
+	}
+	if (len <= 0) {
+		setErrMsg("Invalid amount of test bytes requested");
+		return false;
+	}
 
-    for (int i = 0; i < len; i++)
-    {
-        bool status = retrieveTestByte(rx + i);
-        if (!status)
-        {
-            break;
-        }
-    }
+	for (int i = 0; i < len; i++) {
+		status = retrieveTestByte(rx + i);
+		if (!status) {
+			break;
+		}
+	}
 
-    return status;
+	return status;
 }
-
 
 /**
  * Retrieves a raw (unprocessed) random byte value.
@@ -503,13 +439,11 @@ bool MicroRngSPI::retrieveTestBytes(int len, uint8_t *rx)
  *
  * @return true when random data successfully retrieved
  */
-bool MicroRngSPI::retrieveRawRandomByte(uint8_t *rx)
-{
-    if (!isConnected())
-    {
-        return false;
-    }
-    return executeCommand(rawRandomByteCommand, rx);
+bool MicroRngSPI::retrieveRawRandomByte(uint8_t *rx) {
+	if (!isConnected()) {
+		return false;
+	}
+	return executeCommand(m_rawRandomByteCommand, rx);
 }
 
 /**
@@ -521,29 +455,24 @@ bool MicroRngSPI::retrieveRawRandomByte(uint8_t *rx)
  *
  * @return true when random data successfully retrieved
  */
-bool MicroRngSPI::retrieveRawRandomBytes(int len, uint8_t *rx)
-{
-    bool status = true;
-    if (!isConnected())
-    {
-        return false;
-    }
-    if (len <= 0)
-    {
-        setErrMsg("Invalid amount of raw random bytes requested");
-        return false;
-    }
+bool MicroRngSPI::retrieveRawRandomBytes(int len, uint8_t *rx) {
+	bool status = true;
+	if (!isConnected()) {
+		return false;
+	}
+	if (len <= 0) {
+		setErrMsg("Invalid amount of raw random bytes requested");
+		return false;
+	}
 
-    for (int i = 0; i < len; i++)
-    {
-        bool status = retrieveRawRandomByte(rx + i);
-        if (!status)
-        {
-            break;
-        }
-    }
+	for (int i = 0; i < len; i++) {
+		status = retrieveRawRandomByte(rx + i);
+		if (!status) {
+			break;
+		}
+	}
 
-    return status;
+	return status;
 }
 
 /**
@@ -552,9 +481,8 @@ bool MicroRngSPI::retrieveRawRandomBytes(int len, uint8_t *rx)
  * @param clockHz new SPI master clock frequency in Hz
  *
  */
-void MicroRngSPI::setMaxClockFrequency(uint32_t clockHz)
-{
-    this->clockHz = clockHz;
+void MicroRngSPI::setMaxClockFrequency(uint32_t clockHz) {
+	this->m_clockHz = clockHz;
 }
 
 /**
@@ -563,9 +491,8 @@ void MicroRngSPI::setMaxClockFrequency(uint32_t clockHz)
  * @return current SPI master clock frequency in Hz
  *
  */
-uint32_t MicroRngSPI::getMaxClockFrequency()
-{
-    return clockHz;
+uint32_t MicroRngSPI::getMaxClockFrequency() const {
+	return m_clockHz;
 }
 
 /**
@@ -573,9 +500,8 @@ uint32_t MicroRngSPI::getMaxClockFrequency()
  *
  * @param errMessage new error message
  */
-void MicroRngSPI::setErrMsg(const char *errMessage)
-{
-    strcpy(this->lastError, errMessage);
+void MicroRngSPI::setErrMsg(const char *errMessage) {
+	strcpy(this->m_lastError, errMessage);
 }
 
 /**
@@ -584,32 +510,27 @@ void MicroRngSPI::setErrMsg(const char *errMessage)
  * @return true when executed successfully
  *
  */
-bool MicroRngSPI::disconnect()
-{
-    if (!isConnected())
-    {
-        return false;
-    }
-    close(fd);
-    initialize();
-    return true;
+bool MicroRngSPI::disconnect() {
+	if (!isConnected()) {
+		return false;
+	}
+	close(m_fd);
+	initialize();
+	return true;
 }
 
 /**
  * Retrieves a pointer to the internally saved error message
  */
-const char* MicroRngSPI::getLastErrMsg()
-{
-    return this->lastError;
+const char* MicroRngSPI::getLastErrMsg() const {
+	return this->m_lastError;
 }
 
 /**
  * De-allocate resources
  */
-MicroRngSPI::~MicroRngSPI()
-{
-    if (isConnected())
-    {
-        disconnect();
-    }
+MicroRngSPI::~MicroRngSPI() {
+	if (isConnected()) {
+		disconnect();
+	}
 }

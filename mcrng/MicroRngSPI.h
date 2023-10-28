@@ -1,5 +1,5 @@
 /**
- *   Copyright (C) 2014-2022 TectroLabs LLC, https://tectrolabs.com
+ *   Copyright (C) 2014-2023 TectroLabs LLC, https://tectrolabs.com
  *
  *    Permission is hereby granted, free of charge, to any person obtaining
  *    a copy of this software and associated documentation files (the "Software"),
@@ -23,8 +23,8 @@
 /**
  *    @file MicroRngSPI.h
  *    @author Andrian Belinski
- *    @date 06/07/2022
- *    @version 1.1
+ *    @date 10/28/2023
+ *    @version 1.2
  *
  *    @brief communicates with MicroRNG device through SPI interface on Raspberry PI 3+ or other Linux-based single-board computers.
  *
@@ -46,55 +46,58 @@
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
 
-class MicroRngSPI
-{
+class MicroRngSPI {
 public:
-    MicroRngSPI();
-    virtual ~MicroRngSPI();
-    bool isConnected();
-    bool connect(const char *devicePath);
-    bool validateDevice();
-    bool disconnect();
-    bool executeCommand(char cmd, uint8_t *rx);
-    const char* getLastErrMsg();
-    void setMaxClockFrequency(uint32_t clockHz);
-    uint32_t getMaxClockFrequency();
-    bool retrieveRandomByte(uint8_t *rx);
-    bool retrieveRandomBytes(int len, uint8_t *rx);
-    bool retrieveRawRandomByte(uint8_t *rx);
-    bool retrieveRawRandomBytes(int len, uint8_t *rx);
-    bool retrieveTestByte(uint8_t *rx);
-    bool retrieveTestBytes(int len, uint8_t *rx);
-    bool retrieveDeviceStatusByte(uint8_t *rx);
-    bool shutDownNoiseSources(uint8_t *rx);
-    bool startUpNoiseSources(uint8_t *rx);
-    bool resetUART(uint8_t *rx);
-    bool validateCommunication();
-    bool autodetectMaxFrequency();
+	MicroRngSPI();
+	MicroRngSPI(MicroRngSPI const&) = delete;
+	MicroRngSPI(MicroRngSPI&&) = delete;
+	MicroRngSPI& operator=(MicroRngSPI const&) = delete;
+	MicroRngSPI& operator=(MicroRngSPI&&) = delete;
+	virtual ~MicroRngSPI();
 
-protected:
+	bool isConnected() const;
+	bool connect(const char *devicePath);
+	bool validateDevice();
+	bool disconnect();
+	bool executeCommand(char cmd, uint8_t *rx);
+	const char* getLastErrMsg() const;
+	void setMaxClockFrequency(uint32_t clockHz);
+	uint32_t getMaxClockFrequency() const;
+	bool retrieveRandomByte(uint8_t *rx);
+	bool retrieveRandomBytes(int len, uint8_t *rx);
+	bool retrieveRawRandomByte(uint8_t *rx);
+	bool retrieveRawRandomBytes(int len, uint8_t *rx);
+	bool retrieveTestByte(uint8_t *rx);
+	bool retrieveTestBytes(int len, uint8_t *rx);
+	bool retrieveDeviceStatusByte(uint8_t *rx);
+	bool shutDownNoiseSources(uint8_t *rx);
+	bool startUpNoiseSources(uint8_t *rx);
+	bool resetUART(uint8_t *rx);
+	bool validateCommunication();
+	bool autodetectMaxFrequency();
 
 private:
-    int fd;
-    uint32_t clockHz;
-    uint32_t maxClockHz;
-    uint32_t minClockHz;
-    char lastSentCommand;
-    uint32_t spiMode;
-    uint8_t spiBits;
-    bool deviceConnected;
-    char lastError[512];
-    char testCommand;
-    char randomByteCommand;
-    char statusByteCommand;
-    char rawRandomByteCommand;
-    char shutDownCommand;
-    char startUpCommand;
-    char resetUartSpeedCommand;
-    void setErrMsg(const char *errMessage);
-    void clearErrMsg();
-    void initialize();
-    bool exhangeByte(char cmd, uint8_t *rx);
+	void setErrMsg(const char *errMessage);
+	void clearErrMsg();
+	void initialize();
+	bool exhangeByte(char cmd, uint8_t *rx);
+
+	int m_fd;
+	uint32_t m_clockHz;
+	uint32_t m_maxClockHz;
+	uint32_t m_minClockHz;
+	char m_lastSentCommand;
+	uint32_t m_spiMode;
+	uint8_t m_spiBits;
+	bool m_deviceConnected;
+	char m_lastError[512];
+	char m_testCommand;
+	char m_randomByteCommand;
+	char m_statusByteCommand;
+	char m_rawRandomByteCommand;
+	char m_shutDownCommand;
+	char m_startUpCommand;
+	char m_resetUartSpeedCommand;
 
 };
 
